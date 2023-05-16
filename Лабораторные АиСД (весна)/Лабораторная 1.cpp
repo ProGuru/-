@@ -26,7 +26,7 @@ int main()
 		{
 			result = c.ClasstoDima(x, oper, y);
 		}
-		cout << "Result is: " << result << endl;
+		cout << "Result is: " << result << endl; // что-то там
 	}
 
 	return 0; // конец
