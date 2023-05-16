@@ -29,5 +29,5 @@ int main()
 		cout << "Result is: " << result << endl;
 	}
 
-	return 0;
+	return 0; // конец
 }
