@@ -91,9 +91,12 @@ void put_line(int x0, int y0, int x1, int y1)
 }
 
 //== 2. Библиотека фигур ==
-struct shape { // Виртуальный базовый класс "фигура"
+struct shape { // Виртуальный АБСТРАКТНЫЙ базовый класс "фигура"
+	// ! Нельзя создавать объекты от абстрактного класса
 	static std::list<shape*> shapes;// Список фигур (один на все фигуры!)
 	shape() { shapes.push_back(this); } //Фигура присоединяется к списку
+	// ВИРТУАЛЬНЫЕ методы (чистые виртуальные функции). 
+	// "= 0" означает что у виртуального метода нет тела функции
 	virtual point north() const = 0;	//Точки для привязки
 	virtual point south() const = 0;
 	virtual point east() const = 0;
@@ -116,14 +119,14 @@ void shape_refresh() // Перерисовка всех фигур на экране
 	screen_refresh(); // Вывод результата на экран
 }
 
-class rotatable : virtual public shape
+class rotatable : virtual public shape // ! Нельзя создавать объекты от абстрактного класса
 { //Фигуры, пригодные к повороту 
 public:
 	virtual void rotate_left() = 0;	//Повернуть влево
 	virtual void rotate_right() = 0;	//Повернуть вправо
 };
 
-class reflectable : virtual public shape
+class reflectable : virtual public shape // ! Нельзя создавать объекты от абстрактного класса
 { // Фигуры, пригодные
 public:					     // к зеркальному отражению
 	virtual void flip_horisontally() = 0;	// Отразить горизонтально
