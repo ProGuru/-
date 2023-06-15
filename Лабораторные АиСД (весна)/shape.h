@@ -107,15 +107,15 @@ struct shape { // Виртуальный АБСТРАКТНЫЙ базовый класс "фигура"
 	virtual point swest() const = 0;
 	virtual void draw() = 0;		//Рисование
 	virtual void move(int, int) = 0;	//Перемещение
-	virtual void resize(int) = 0;    	//Изменение размера
+	virtual void resize(int) = 0;    	//Изменение размера пропорционально числу int
 };
 
 std::list<shape*> shape::shapes;   // Размещение списка фигур
 
 void shape_refresh() // Перерисовка всех фигур на экране
 {
-	screen_clear(); // очистить экран
-	for (auto p : shape::shapes) p->draw(); // Вызываются фигуры из списка. Рисование. Динамическое связывание!!!
+	screen_clear(); // очистить экран. Матрица заполняется точками
+	for (auto p : shape::shapes) p->draw(); // Вызываются фигуры из списка. Заносятся в матрицу. Динамическое связывание!!!
 	screen_refresh(); // Вывод результата на экран
 }
 
@@ -157,7 +157,7 @@ public:
 			e.x += a; 
 			e.y += b; 
 	}
-	void draw() { put_line(w, e); }
+	void draw() { put_line(w, e); } // точка заносится в массив
 	void resize(int d) // Увеличение длины линии в (d) раз
 	{
 		e.x += (e.x - w.x) * (d - 1); 
@@ -187,12 +187,12 @@ public:
 	point seast() const { return point(ne.x, sw.y); }
 	point nwest() const { return point(sw.x, ne.y); }
 	point swest() const { return sw; }
-	void rotate_right() // Поворот вправо относительно se
+	void rotate_right() // Поворот вправо относительно se. Наследуется от rotatable
 	{
 		int w = ne.x - sw.x, h = ne.y - sw.y; //(учитывается масштаб по осям)
 		sw.x = ne.x - h * 2; ne.y = sw.y + w / 2;
 	}
-	void rotate_left() // Поворот влево относительно sw
+	void rotate_left() // Поворот влево относительно sw. Наследуется от rotatable
 	{
 		int w = ne.x - sw.x, h = ne.y - sw.y;
 		ne.x = sw.x + h * 2; ne.y = sw.y + w / 2;
@@ -211,10 +211,3 @@ public:
 		put_line(seast(), sw);   put_line(sw, nwest());
 	}
 };
-
-void up(shape& p, const shape& q) // поместить p над q
-{	//Это ОБЫЧНАЯ функция, не член класса! Динамическое связывание!!
-	point n = q.north();
-	point s = p.south();
-	p.move(n.x - s.x, n.y - s.y + 1);
-}

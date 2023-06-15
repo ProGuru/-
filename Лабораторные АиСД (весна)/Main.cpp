@@ -46,6 +46,13 @@ void down(shape &p, const shape &q)
 	p.move(n.x - s.x, n.y - s.y - 1);
 }
 
+void up(shape& p, const shape& q) // поместить p над q
+{	//Ёто ќЅџ„Ќјя функци€, не член класса! ƒинамическое св€зывание!!
+	point n = q.north();
+	point s = p.south();
+	p.move(n.x - s.x, n.y - s.y + 1);
+}
+
 // Cборна€ пользовательска€ фигура - физиономи€
 class myshape : public rectangle
 { // ћо€ фигура я¬Ћя≈“—я
@@ -61,7 +68,8 @@ public:
 	void resize(int) { }
 };
 
-myshape::myshape(point a, point b) : rectangle(a, b),	//»нициализаци€ базового класса
+myshape::myshape(point a, point b) : 
+	rectangle(a, b),	//»нициализаци€ базового класса
 	w(neast().x - swest().x + 1), // »нициализаци€ данных
 	h(neast().y - swest().y + 1), // - строго в пор€дке объ€влени€!
 	l_eye(point(swest().x + 2, swest().y + h * 3 / 4), 2),
