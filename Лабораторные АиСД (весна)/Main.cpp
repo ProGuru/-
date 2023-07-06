@@ -102,6 +102,7 @@ int main()
 	line brim(point(0, 15), 17);
 	myshape face(point(15, 10), point(27, 18));
 	h_circle beard(point(40, 10), point(50, 20));
+	parallelogram horn(point(60, 2), point(70, 8));
 	shape_refresh();
 	std::cout << "=== Generated... ===\n";
 	std::cin.get(); //Смотреть исходный набор

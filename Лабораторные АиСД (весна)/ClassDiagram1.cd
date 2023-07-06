@@ -21,10 +21,10 @@
       <FileName>shape.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="rectangle">
+  <Class Name="parallelogram">
     <Position X="5" Y="9.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAGAAAgAAAAAIACAAAIwACAAQAAQAAFAAQAABAAAgAA=</HashCode>
+      <HashCode>AAGAAAgGQAAAIACAAAIwAAAAQAAQAAFAAQAABABAgAA=</HashCode>
       <FileName>shape.h</FileName>
     </TypeIdentifier>
   </Class>

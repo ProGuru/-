@@ -23,6 +23,9 @@
 #include <list>
 #include <iostream>
 #include "screen.h"
+#include <cmath>
+
+#define PI 3.14159265 
 //==1. ѕоддержка экрана в форме матрицы символов ==
 char screen[YMAX][XMAX];
 enum color
@@ -157,7 +160,7 @@ public:
 			e.x += a; 
 			e.y += b; 
 	}
-	void draw() { put_line(w, e); } // точка заноситс€ в массив
+	void draw() { put_line(w, e); } // лини€ заноситс€ в массив
 	void resize(int d) // ”величение длины линии в (d) раз
 	{
 		e.x += (e.x - w.x) * (d - 1); 
@@ -209,5 +212,136 @@ public:
 	{
 		put_line(nwest(), ne);   put_line(ne, seast());
 		put_line(seast(), sw);   put_line(sw, nwest());
+	}
+};
+
+// ѕараллелограмм
+class parallelogram : public rotatable, public reflectable
+{
+		/*	nw ---- n ----------- ne
+		   /                     /
+		  /                     /
+		w		    c          e
+	   /                      /
+	  /                      /
+	sw ------------ s ---- se */
+protected:
+	point sw, ne;
+	point nw, se; // дополнительные координаты. «амен€ют sw и ne, если reflected = true
+	double angle; // острый угол в параллелограме
+	bool rotate;
+public:
+	parallelogram(point a, point b, int alf = -5, bool r = true) : sw(a), ne(b), angle(alf * PI / 180), rotate(r), 
+		nw((int)(sw.x + (ne.y - sw.y) / tan(angle)), ne.y), se((int)(ne.x - (ne.y - sw.y) / tan(angle)), sw.y) { }
+	point north() const { return point((sw.x + ne.x) / 2, ne.y); }
+	point south() const { return point((sw.x + ne.x) / 2, sw.y); }
+	point east() const { return point((int)(ne.x - 0,5 * (ne.y - sw.y) / tan(angle)), (sw.y + ne.y) / 2); }
+	point west() const { return point((int)(sw.x + 0,5 * (ne.y - sw.y) / tan(angle)), (sw.y + ne.y) / 2); }
+	point neast() const { return ne; }
+	point seast() const { return point((int)(ne.x - (ne.y - sw.y) / tan(angle)), sw.y); }
+	point nwest() const { return point((int)(sw.x + (ne.y - sw.y) / tan(angle)), ne.y); }
+	point swest() const { return sw; }
+	void rotate_right() // ѕоворот вправо относительно se. Ќаследуетс€ от rotatable
+	{
+		rotate = !rotate;
+		
+		// находим условный центр
+		point centr;
+		centr.x = (ne.x - sw.x)/2, centr.y = (ne.y - sw.y)/2;
+
+		// поворачиваем координаты по часовой стрелке относительнос центра
+		rotateCoordinate(sw, centr, true);
+		rotateCoordinate(ne, centr, true);
+		rotateCoordinate(nw, centr, true);
+		rotateCoordinate(se, centr, true);
+	}
+	void rotate_left() // ѕоворот влево относительно sw. Ќаследуетс€ от rotatable
+	{
+		rotate = !rotate;
+
+		// находим условный центр
+		point centr;
+		centr.x = (ne.x - sw.x) / 2, centr.y = (ne.y - sw.y) / 2;
+
+		// поворачиваем координаты по часовой стрелке относительнос центра
+		rotateCoordinate(sw, centr, false);
+		rotateCoordinate(ne, centr, false);
+		rotateCoordinate(nw, centr, false);
+		rotateCoordinate(se, centr, false);
+	}
+
+	void flip_horisontally()
+	{
+			/*	nw ---- n ----------- ne
+			   /                     /
+			  /                     /
+			w		    c          e
+		   /                      /
+		  /                      /
+		sw ------------ s ---- se */
+
+	/*	nw ---- n ------- ne
+		 /                     /
+		  /                      /
+		   w		    c          e
+		    /                      /
+		     /                      /
+		      sw ------------ s ---- se */
+		point templeSW = sw, templeNE = ne, templeNW = nw, templeSE = se;
+		if (rotate) {
+			sw.x = templeNW.x;
+			ne.x = templeSE.x;
+			nw.x = templeSW.x;
+			se.x = templeNE.x;
+		}
+		else
+		{
+			sw.y = templeSE.y;
+			ne.y = templeNW.y;
+			nw.y = templeNE.y;
+			se.y = templeSW.y;
+		}
+
+	}
+
+	void flip_vertically()
+	{
+		flip_horisontally(); // дл€ параллелограмма не имеет значени€, горизонтальное или вертикальное отражение
+	}
+
+	void move(int a, int b)
+	{
+		sw.x += a; sw.y += b; ne.x += a; ne.y += b;
+		nw.x += a; nw.y += b; se.x += a; se.y += b;
+	}
+	void resize(int d)
+	{
+		ne.x += (ne.x - sw.x) * (d - 1); ne.y += (ne.y - sw.y) * (d - 1);
+
+		nw.x = (int)(sw.x + (ne.y - sw.y) / tan(angle)); 
+		nw.y = ne.y;
+		se.x = (int)(ne.x - (ne.y - sw.y) / tan(angle)); 
+		se.y = sw.y;
+	}
+	void draw()
+	{
+		put_line(sw, nw);   put_line(nw, ne);
+		put_line(ne, se);   put_line(se, sw);
+	}
+
+	void rotateCoordinate(point& p, const point& c, bool clockWise) // дополнительна€ функци€ дл€ вычислени€ координат
+	{
+		int deltaX = p.x - c.x;
+		int deltaY = p.y - c.y;
+		if (clockWise) {
+			p.x = deltaY + c.x;
+			p.y = -deltaX + c.y;
+		}
+		else
+		{
+			p.x = -deltaY + c.x;
+			p.y = deltaX + c.y;
+		}
+		
 	}
 };
