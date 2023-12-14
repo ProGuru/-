@@ -22,9 +22,9 @@
     </TypeIdentifier>
   </Class>
   <Class Name="parallelogram">
-    <Position X="5" Y="9.5" Width="1.5" />
+    <Position X="5" Y="7" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAGAAAgGQAAAIACAAAIwAAAAQAAQAAFAAQAABABAgAA=</HashCode>
+      <HashCode>AAGAAAgGQAAAIACAAAYwAAAAQQAwAAFAAQAABABAgAA=</HashCode>
       <FileName>shape.h</FileName>
     </TypeIdentifier>
   </Class>

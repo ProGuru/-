@@ -46,10 +46,38 @@ void down(shape &p, const shape &q)
 	p.move(n.x - s.x, n.y - s.y - 1);
 }
 
-void up(shape& p, const shape& q) // поместить p над q
+void up(shape &p, const shape &q) // поместить p над q
 {	//Это ОБЫЧНАЯ функция, не член класса! Динамическое связывание!!
 	point n = q.north();
 	point s = p.south();
+	p.move(n.x - s.x, n.y - s.y + 1);
+}
+
+void upLeftСorner(shape &p, const shape &q) // поместить p над q
+{	//Это ОБЫЧНАЯ функция, не член класса! Динамическое связывание!!
+	point n = q.west();
+	point s = p.south();
+	p.move(n.x - s.x, n.y - s.y + 1);
+}
+
+void upRightСorner(shape &p, const shape &q) // поместить p над q
+{	//Это ОБЫЧНАЯ функция, не член класса! Динамическое связывание!!
+	point n = q.east();
+	point s = p.south();
+	p.move(n.x - s.x, n.y - s.y + 1);
+}
+
+void upLeftDownСorner(shape &p, const shape &q) // поместить p над q
+{	//Это ОБЫЧНАЯ функция, не член класса! Динамическое связывание!!
+	point n = q.swest();
+	point s = p.neast();
+	p.move(n.x - s.x, n.y - s.y + 1);
+}
+
+void upRightDownСorner(shape &p, const shape &q) // поместить p над q
+{	//Это ОБЫЧНАЯ функция, не член класса! Динамическое связывание!!
+	point n = q.seast();
+	point s = p.nwest();
 	p.move(n.x - s.x, n.y - s.y + 1);
 }
 
@@ -102,12 +130,27 @@ int main()
 	line brim(point(0, 15), 17);
 	myshape face(point(15, 10), point(27, 18));
 	h_circle beard(point(40, 10), point(50, 20));
-	parallelogram horn(point(60, 2), point(70, 8));
+	parallelogram horn1(point(12, 32), point(20, 38));
+	parallelogram horn2(point(70, 19), point(86, 31));
+	parallelogram horn3(point(66, 4), point(74, 10));
+	parallelogram horn4(point(60, 36), point(68, 42));
 	shape_refresh();
 	std::cout << "=== Generated... ===\n";
 	std::cin.get(); //Смотреть исходный набор
 
 					//== 2.Подготовка к сборке ==
+	// масштабирование добавленных фигур
+	horn1.resize(0.5);
+	horn2.resize(0.25);
+	horn3.resize(0.5);
+	horn4.resize(0.5);
+
+	// поворот добавленных фигур
+	horn1.flip_horisontally();
+	horn1.rotate_right(); // рог 1
+	horn2.rotate_left(); // рог 2
+	horn4.flip_vertically();  // бакенбард 2
+
 	hat.rotate_right();
 	brim.resize(2);
 	face.resize(2);
@@ -120,6 +163,15 @@ int main()
 	up(brim, face);
 	up(hat, brim);
 	down(beard, face);
+
+	// примыкание рогов
+	upLeftСorner(horn2, brim);
+	upRightСorner(horn1, brim);
+
+	// примыкание бакенбардов
+	upLeftDownСorner(horn4, face);
+	upRightDownСorner(horn3, face);
+
 	shape_refresh();
 	std::cout << "=== Ready! ===\n";
 	std::cin.get(); //Смотреть результат

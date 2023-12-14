@@ -110,7 +110,7 @@ struct shape { // Виртуальный АБСТРАКТНЫЙ базовый класс "фигура"
 	virtual point swest() const = 0;
 	virtual void draw() = 0;		//Рисование
 	virtual void move(int, int) = 0;	//Перемещение
-	virtual void resize(int) = 0;    	//Изменение размера пропорционально числу int
+	virtual void resize(float) = 0;    	//Изменение размера пропорционально числу int
 };
 
 std::list<shape*> shape::shapes;   // Размещение списка фигур
@@ -161,7 +161,7 @@ public:
 			e.y += b; 
 	}
 	void draw() { put_line(w, e); } // линия заносится в массив
-	void resize(int d) // Увеличение длины линии в (d) раз
+	void resize(float d) // Увеличение длины линии в (d) раз
 	{
 		e.x += (e.x - w.x) * (d - 1); 
 		e.y += (e.y - w.y) * (d - 1);
@@ -204,7 +204,7 @@ public:
 	{
 		sw.x += a; sw.y += b; ne.x += a; ne.y += b;
 	}
-	void resize(int d)
+	void resize(float d)
 	{
 		ne.x += (ne.x - sw.x) * (d - 1); ne.y += (ne.y - sw.y) * (d - 1);
 	}
@@ -228,18 +228,18 @@ class parallelogram : public rotatable, public reflectable
 protected:
 	point sw, ne;
 	point nw, se; // дополнительные координаты. Заменяют sw и ne, если reflected = true
-	double angle; // острый угол в параллелограме
+	float angle = -0.5; // острый угол в параллелограме
 	bool rotate;
 public:
-	parallelogram(point a, point b, int alf = -5, bool r = true) : sw(a), ne(b), angle(alf * PI / 180), rotate(r), 
-		nw((int)(sw.x + (ne.y - sw.y) / tan(angle)), ne.y), se((int)(ne.x - (ne.y - sw.y) / tan(angle)), sw.y) { }
+	parallelogram(point a, point b, bool r = true) : sw(a), ne(b), rotate(r), 
+		nw((int)(sw.x + (ne.y - sw.y) / std::tan(-0.5)), ne.y), se((int)(ne.x - (ne.y - sw.y) / std::tan(-0.5)), sw.y) { }
 	point north() const { return point((sw.x + ne.x) / 2, ne.y); }
 	point south() const { return point((sw.x + ne.x) / 2, sw.y); }
-	point east() const { return point((int)(ne.x - 0,5 * (ne.y - sw.y) / tan(angle)), (sw.y + ne.y) / 2); }
-	point west() const { return point((int)(sw.x + 0,5 * (ne.y - sw.y) / tan(angle)), (sw.y + ne.y) / 2); }
+	point east() const { return point((int)(ne.x - 0,5 * (ne.y - sw.y) / std::tan(angle)), (sw.y + ne.y) / 2); }
+	point west() const { return point((int)(sw.x + 0,5 * (ne.y - sw.y) / std::tan(angle)), (sw.y + ne.y) / 2); }
 	point neast() const { return ne; }
-	point seast() const { return point((int)(ne.x - (ne.y - sw.y) / tan(angle)), sw.y); }
-	point nwest() const { return point((int)(sw.x + (ne.y - sw.y) / tan(angle)), ne.y); }
+	point seast() const { return point((int)(ne.x - (ne.y - sw.y) / std::tan(angle)), sw.y); }
+	point nwest() const { return point((int)(sw.x + (ne.y - sw.y) / std::tan(angle)), ne.y); }
 	point swest() const { return sw; }
 	void rotate_right() // Поворот вправо относительно se. Наследуется от rotatable
 	{
@@ -247,13 +247,21 @@ public:
 		
 		// находим условный центр
 		point centr;
-		centr.x = (ne.x - sw.x)/2, centr.y = (ne.y - sw.y)/2;
+		centr.x = sw.x + abs((int)((ne.x - sw.x) / 2));
+		centr.y = sw.y + abs((int)((ne.y - sw.y) / 2));
 
 		// поворачиваем координаты по часовой стрелке относительнос центра
 		rotateCoordinate(sw, centr, true);
 		rotateCoordinate(ne, centr, true);
 		rotateCoordinate(nw, centr, true);
 		rotateCoordinate(se, centr, true);
+		/*
+		point templePoint = nw;
+		nw = ne;
+		ne = se;
+		se = sw;
+		sw = templePoint;
+		*/
 	}
 	void rotate_left() // Поворот влево относительно sw. Наследуется от rotatable
 	{
@@ -261,13 +269,21 @@ public:
 
 		// находим условный центр
 		point centr;
-		centr.x = (ne.x - sw.x) / 2, centr.y = (ne.y - sw.y) / 2;
+		centr.x = sw.x + abs((int)((ne.x - sw.x) / 2));
+		centr.y = sw.y + abs((int)((ne.y - sw.y) / 2));
 
 		// поворачиваем координаты по часовой стрелке относительнос центра
 		rotateCoordinate(sw, centr, false);
 		rotateCoordinate(ne, centr, false);
 		rotateCoordinate(nw, centr, false);
 		rotateCoordinate(se, centr, false);
+
+		// обратный обмен координатами
+		point templePoint = nw;
+		nw = sw;
+		sw = se;
+		se = ne;
+		ne = templePoint;
 	}
 
 	void flip_horisontally()
@@ -314,7 +330,7 @@ public:
 		sw.x += a; sw.y += b; ne.x += a; ne.y += b;
 		nw.x += a; nw.y += b; se.x += a; se.y += b;
 	}
-	void resize(int d)
+	void resize(float d)
 	{
 		ne.x += (ne.x - sw.x) * (d - 1); ne.y += (ne.y - sw.y) * (d - 1);
 
@@ -334,13 +350,13 @@ public:
 		int deltaX = p.x - c.x;
 		int deltaY = p.y - c.y;
 		if (clockWise) {
-			p.x = deltaY + c.x;
-			p.y = -deltaX + c.y;
+			p.x = c.x - deltaY;
+			p.y = c.y + deltaX;
 		}
 		else
 		{
-			p.x = -deltaY + c.x;
-			p.y = deltaX + c.y;
+			p.x = c.x + deltaY;
+			p.y = c.y - deltaX;
 		}
 		
 	}
